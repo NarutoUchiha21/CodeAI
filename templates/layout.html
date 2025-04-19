@@ -112,6 +112,17 @@
     <main class="container my-4">
         {% block content %}{% endblock %}
     </main>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay d-none">
+        <div class="loading-spinner"></div>
+        <div class="loading-message" id="loadingMessage">Processing...</div>
+        <div class="loading-details" id="loadingDetails">This may take a few moments</div>
+        <div class="loading-progress">
+            <div class="loading-progress-bar" id="loadingProgressBar"></div>
+        </div>
+        <button class="loading-cancel" id="loadingCancel">Cancel</button>
+    </div>
 
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-dark">

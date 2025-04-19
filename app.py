@@ -195,8 +195,8 @@ def analyze():
         
         # Store a small summary in session for quick access
         analysis_summary = {
-            'total_files': len(analysis_result.files),
-            'languages': list(analysis_result.language_stats.keys()),
+            'total_files': len(analysis_result.structure.keys()),
+            'languages': list(analysis_result.languages.keys()),
             'total_entities': len(analysis_result.entities)
         }
         session['analysis_summary'] = analysis_summary

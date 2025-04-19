@@ -226,9 +226,55 @@
         
         // Show loading state when Git form is submitted
         if (gitUploadForm) {
-            gitUploadForm.addEventListener('submit', function() {
+            gitUploadForm.addEventListener('submit', function(e) {
+                // Get the repo URL for the loading message
+                const repoUrl = document.getElementById('git_url').value;
+                const repoName = repoUrl.split('/').pop().replace('.git', '');
+                
+                // Show loading overlay with customized message
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const loadingMessage = document.getElementById('loadingMessage');
+                const loadingDetails = document.getElementById('loadingDetails');
+                
+                loadingMessage.textContent = `Cloning Repository: ${repoName}`;
+                loadingDetails.textContent = 'This may take a few minutes depending on the repository size';
+                
+                // Show the button state change for immediate feedback
                 gitUploadButton.disabled = true;
-                gitUploadButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cloning & Analyzing...';
+                gitUploadButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cloning...';
+                
+                // Show loading overlay with a slight delay to allow for button state change to be visible first
+                setTimeout(() => {
+                    loadingOverlay.classList.remove('d-none');
+                    
+                    // Fake progress updates to show activity
+                    let progress = 0;
+                    const progressBar = document.getElementById('loadingProgressBar');
+                    const progressInterval = setInterval(() => {
+                        if (progress < 90) {
+                            progress += Math.random() * 5;
+                            progressBar.style.width = `${progress}%`;
+                            
+                            if (progress > 30 && progress < 40) {
+                                loadingDetails.textContent = 'Downloading repository files...';
+                            } else if (progress > 60 && progress < 70) {
+                                loadingDetails.textContent = 'Analyzing code structure...';
+                            } else if (progress > 80) {
+                                loadingDetails.textContent = 'Building knowledge graph...';
+                            }
+                        }
+                    }, 800);
+                    
+                    // Store the interval ID in a form property so it can be accessed elsewhere
+                    gitUploadForm.progressInterval = progressInterval;
+                }, 100);
+                
+                // Handle cancel button
+                const cancelButton = document.getElementById('loadingCancel');
+                cancelButton.addEventListener('click', function() {
+                    // We can't actually cancel the server-side process, but we can redirect back
+                    window.location.href = window.location.pathname;
+                });
             });
         }
         
