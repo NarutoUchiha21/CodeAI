@@ -1,0 +1,85 @@
+{
+  "output_dir": "output",
+  "analysis": {
+    "max_file_size": 1048576,
+    "excluded_dirs": [".git", "node_modules", "__pycache__", ".venv", "venv", "env"],
+    "excluded_files": [".pyc", ".min.js", ".map"],
+    "language_extensions": {
+      ".py": "Python",
+      ".js": "JavaScript",
+      ".ts": "TypeScript",
+      ".html": "HTML",
+      ".css": "CSS",
+      ".java": "Java",
+      ".c": "C",
+      ".cpp": "C++",
+      ".h": "C/C++ Header",
+      ".php": "PHP",
+      ".rb": "Ruby",
+      ".go": "Go",
+      ".rs": "Rust"
+    }
+  },
+  "generation": {
+    "max_iterations": 3,
+    "temperature": 0.7,
+    "max_tokens": 2000,
+    "model": "gpt-4"
+  },
+  "agents": {
+    "timeout": 300,
+    "max_retries": 3,
+    "roles": {
+      "architect": {
+        "priority": 1,
+        "max_attempts": 2
+      },
+      "translator": {
+        "priority": 2,
+        "max_attempts": 2
+      },
+      "programmer": {
+        "priority": 3,
+        "max_attempts": 3
+      },
+      "reviewer": {
+        "priority": 4,
+        "max_attempts": 2
+      },
+      "refiner": {
+        "priority": 5,
+        "max_attempts": 3
+      },
+      "validator": {
+        "priority": 6,
+        "max_attempts": 2
+      },
+      "coordinator": {
+        "priority": 0,
+        "max_attempts": 1
+      }
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "system.log"
+  },
+  "knowledge_graph": {
+    "visualization": true,
+    "export_format": "json",
+    "metrics": {
+      "centrality": true,
+      "communities": true,
+      "impact": true
+    }
+  },
+  "code_quality": {
+    "complexity_threshold": 10,
+    "max_function_length": 50,
+    "max_class_length": 500,
+    "max_file_length": 1000,
+    "documentation_required": true,
+    "test_coverage_minimum": 80
+  }
+} 
