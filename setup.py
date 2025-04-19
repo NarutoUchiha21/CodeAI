@@ -15,7 +15,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/code-analysis-system",
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -33,11 +34,11 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "code-analysis=main:main",
+            "code-analysis=code_analysis.cli:main",
         ],
     },
     include_package_data=True,
     package_data={
-        "": ["*.json"],
+        "code_analysis": ["templates/*", "static/*"],
     },
 ) 
