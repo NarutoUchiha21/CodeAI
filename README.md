@@ -1,59 +1,51 @@
-# Code Analysis and Re-implementation System
+# Code Analysis System
 
-A sophisticated AI-powered system for analyzing codebases and generating detailed specifications for re-implementation. This system uses advanced semantic analysis, knowledge graphs, and multi-agent collaboration to understand and reconstruct software systems.
+An AI-powered system for analyzing codebases and generating specifications for re-implementation.
 
 ## Features
 
-- **Semantic Code Analysis**: Deep understanding of code structure, patterns, and relationships
-- **Knowledge Graph Generation**: Visual representation of code dependencies and relationships
-- **Specification Generation**: Automatic creation of detailed implementation specifications
-- **Multi-Agent Implementation**: Collaborative agents for code generation and refinement
-- **Pattern Recognition**: Detection of design patterns, architectural patterns, and code smells
-- **Iterative Refinement**: Continuous improvement of generated code through validation and feedback
+- Codebase analysis and understanding
+- Specification generation
+- Implementation strategy planning
+- Code generation
+- Validation and testing
+- Visualization tools
+- Web interface
+- CLI tools
 
-## Architecture
+## Project Structure
 
-The system consists of several key components:
+```
+code-analysis-system/
+├── src/
+│   └── code_analysis/
+│       ├── core/           # Core functionality
+│       │   ├── models.py
+│       │   ├── knowledge_graph.py
+│       │   ├── code_analyzer.py
+│       │   ├── code_generator.py
+│       │   ├── strategy_generator.py
+│       │   └── validator.py
+│       ├── agents/         # Agent-based components
+│       │   ├── orchestrator.py
+│       │   └── spec_extractor.py
+│       ├── utils/          # Utility functions
+│       │   ├── visualizer.py
+│       │   └── git_utils.py
+│       ├── web/           # Web interface
+│       │   └── app.py
+│       ├── templates/     # Web templates
+│       ├── static/        # Static assets
+│       └── cli.py         # Command-line interface
+├── tests/                # Test suite
+├── docs/                 # Documentation
+├── examples/             # Example projects
+├── setup.py             # Package configuration
+├── requirements.txt     # Dependencies
+└── README.md           # This file
+```
 
-### Core Components
-
-1. **Code Analyzer** (`code_analyzer.py`)
-   - Performs semantic analysis of codebases
-   - Detects patterns and anti-patterns
-   - Analyzes code complexity and maintainability
-
-2. **Knowledge Graph** (`knowledge_graph.py`)
-   - Creates semantic relationships between code entities
-   - Visualizes code dependencies
-   - Identifies core components and their impact
-
-3. **Strategy Generator** (`strategy_generator.py`)
-   - Generates implementation strategies
-   - Plans implementation steps
-   - Manages dependencies between components
-
-4. **Code Generator** (`code_generator.py`)
-   - Implements code based on specifications
-   - Performs multi-turn synthesis
-   - Refines code through iterative improvement
-
-5. **Agent Orchestrator** (`agent_orchestrator.py`)
-   - Coordinates multiple specialized agents
-   - Manages communication between agents
-   - Handles the implementation workflow
-
-### Data Models
-
-The system uses structured data models (`models.py`) to represent:
-- Code entities (classes, functions, modules)
-- Specifications
-- Implementation steps and strategies
-- Analysis results
-- Agent states and messages
-
-## Usage
-
-### Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -61,82 +53,89 @@ git clone https://github.com/yourusername/code-analysis-system.git
 cd code-analysis-system
 ```
 
-2. Install dependencies:
+2. Create a virtual environment:
 ```bash
-pip install -r requirements.txt
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Set up environment variables:
+3. Install the package:
 ```bash
-export OPENAI_API_KEY=your_api_key
+pip install -e .
 ```
 
-### Running the System
+## Usage
 
-To analyze a codebase and generate specifications:
+### Command Line Interface
 
+The system provides a CLI with three main commands:
+
+1. Analyze a codebase:
 ```bash
-python main.py --codebase /path/to/codebase --config config.json --output results
+code-analysis analyze /path/to/codebase --output ./analysis_results
 ```
 
-Arguments:
-- `--codebase`: Path to the codebase to analyze (required)
-- `--config`: Path to configuration file (optional)
-- `--output`: Output directory for results (optional)
+2. Generate implementation from specifications:
+```bash
+code-analysis generate /path/to/specs.json --output ./generated_code
+```
 
-### Output
+3. Visualize analysis results:
+```bash
+code-analysis visualize /path/to/analysis.json --output ./visualizations
+```
 
-The system generates several output files:
-- `analysis_*.json`: Codebase analysis results
-- `knowledge_graph_*.json`: Knowledge graph representation
-- `specifications_*.json`: Generated specifications
-- `strategy_*.json`: Implementation strategy
-- `implementation_*.json`: Implementation results
+### Web Interface
 
-## Agent Roles
+To start the web interface:
 
-The system uses several specialized agents:
+```bash
+python -m code_analysis.web.app
+```
 
-1. **Architect**: Designs the overall system architecture
-2. **Translator**: Converts specifications to implementation details
-3. **Programmer**: Generates actual code
-4. **Reviewer**: Reviews code for quality and correctness
-5. **Refiner**: Improves code based on feedback
-6. **Validator**: Validates code against specifications
-7. **Coordinator**: Manages the overall process
+Then open your browser at `http://localhost:5000`.
 
-## Configuration
+### Python API
 
-Create a `config.json` file to customize the system:
+```python
+from code_analysis.core import CodeAnalyzer, CodeGenerator
+from code_analysis.agents import AgentOrchestrator
 
-```json
-{
-  "output_dir": "output",
-  "analysis": {
-    "max_file_size": 1048576,
-    "excluded_dirs": [".git", "node_modules", "__pycache__"]
-  },
-  "generation": {
-    "max_iterations": 3,
-    "temperature": 0.7
-  },
-  "agents": {
-    "timeout": 300,
-    "max_retries": 3
-  }
-}
+# Analyze a codebase
+analyzer = CodeAnalyzer()
+analysis = await analyzer.analyze("/path/to/codebase")
+
+# Generate implementation
+generator = CodeGenerator()
+implementation = await generator.generate_code(analysis)
+```
+
+## Development
+
+1. Install development dependencies:
+```bash
+pip install -e ".[dev]"
+```
+
+2. Run tests:
+```bash
+pytest
+```
+
+3. Generate documentation:
+```bash
+cd docs
+make html
 ```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Inspired by AIDA and ChatDev projects
-- Uses OpenAI's GPT models for code generation
-- Built with Python 3.8+ 
+This project is licensed under the MIT License - see the LICENSE file for details. 
