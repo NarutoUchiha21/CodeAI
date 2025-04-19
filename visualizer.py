@@ -213,8 +213,7 @@ def create_dependency_network(knowledge_graph: Dict[str, Any]) -> Dict[str, Any]
         
         # Update layout
         fig.update_layout(
-            title='Code Dependency Network',
-            titlefont=dict(size=16),
+            title=dict(text='Code Dependency Network', font=dict(size=16)),
             showlegend=False,
             margin=dict(l=20, r=20, t=40, b=20),
             hovermode='closest',
@@ -295,7 +294,7 @@ def create_complexity_metrics_chart(analysis_result) -> Dict[str, Any]:
         
         # Update layout
         fig.update_layout(
-            title='Code Complexity Metrics',
+            title=dict(text='Code Complexity Metrics'),
             xaxis_title='Entity',
             yaxis_title='Complexity Score',
             barmode='group',
@@ -318,19 +317,24 @@ def create_complexity_metrics_chart(analysis_result) -> Dict[str, Any]:
         logger.error(f"Error creating complexity metrics chart: {e}")
         return {'error': str(e)}
 
-def create_entity_distribution_chart(analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+def create_entity_distribution_chart(analysis_result) -> Dict[str, Any]:
     """
     Create a chart showing the distribution of entity types in the codebase.
     
     Args:
-        analysis_result: Results from code analysis.
+        analysis_result: Results from code analysis (dict or CodebaseAnalysis).
         
     Returns:
         Dictionary with chart data.
     """
     try:
         # Extract entities
-        entities = analysis_result.get('entities', [])
+        if hasattr(analysis_result, 'entities'):
+            # It's a CodebaseAnalysis object
+            entities = analysis_result.entities
+        else:
+            # It's a dictionary
+            entities = analysis_result.get('entities', [])
         
         if not entities:
             return {'error': 'No entity data available'}
@@ -338,7 +342,14 @@ def create_entity_distribution_chart(analysis_result: Dict[str, Any]) -> Dict[st
         # Count entity types
         entity_types = {}
         for entity in entities:
-            entity_type = entity.get('type', 'unknown')
+            # Handle both dictionary and CodeEntity objects
+            if hasattr(entity, 'type'):
+                # It's a CodeEntity object
+                entity_type = entity.type
+            else:
+                # It's a dictionary
+                entity_type = entity.get('type', 'unknown')
+            
             entity_types[entity_type] = entity_types.get(entity_type, 0) + 1
         
         # Create bar chart
@@ -441,7 +452,7 @@ def create_community_visualization(knowledge_graph: Dict[str, Any]) -> Dict[str,
         
         # Update layout
         fig.update_layout(
-            title='Code Communities',
+            title=dict(text='Code Communities'),
             template='plotly_dark',
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
@@ -520,7 +531,7 @@ def create_centrality_visualization(knowledge_graph: Dict[str, Any]) -> Dict[str
         
         # Update layout
         fig.update_layout(
-            title='Entity Centrality Metrics',
+            title=dict(text='Entity Centrality Metrics'),
             polar=dict(
                 radialaxis=dict(
                     visible=True,
@@ -546,19 +557,24 @@ def create_centrality_visualization(knowledge_graph: Dict[str, Any]) -> Dict[str
         logger.error(f"Error creating centrality visualization: {e}")
         return {'error': str(e)}
 
-def create_file_tree_visualization(analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+def create_file_tree_visualization(analysis_result) -> Dict[str, Any]:
     """
     Create a visualization of the file structure.
     
     Args:
-        analysis_result: Results from code analysis.
+        analysis_result: Results from code analysis (dict or CodebaseAnalysis).
         
     Returns:
         Dictionary with visualization data.
     """
     try:
         # Extract structure
-        structure = analysis_result.get('structure', {})
+        if hasattr(analysis_result, 'structure'):
+            # It's a CodebaseAnalysis object
+            structure = analysis_result.structure
+        else:
+            # It's a dictionary
+            structure = analysis_result.get('structure', {})
         
         if not structure:
             return {'error': 'No structure data available'}
@@ -637,7 +653,7 @@ def create_file_tree_visualization(analysis_result: Dict[str, Any]) -> Dict[str,
         
         # Update layout
         fig.update_layout(
-            title='File Structure',
+            title=dict(text='File Structure'),
             template='plotly_dark',
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
