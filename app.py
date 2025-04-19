@@ -41,48 +41,96 @@ def index():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    """Handle codebase upload"""
+    """Handle codebase upload from ZIP file or Git repository"""
     if request.method == 'POST':
-        # Check if the post request has the file part
-        if 'codebase' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+        upload_type = request.form.get('upload_type', 'zip')
         
-        file = request.files['codebase']
+        # Create a unique folder for this upload
+        upload_id = str(uuid.uuid4())
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id)
+        os.makedirs(upload_path, exist_ok=True)
         
-        # If user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        
-        if file:
-            # Create a unique folder for this upload
-            upload_id = str(uuid.uuid4())
-            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id)
-            os.makedirs(upload_path, exist_ok=True)
-            
-            # Save the zipfile
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(upload_path, filename)
-            file.save(file_path)
-            
-            # Extract the zipfile
-            try:
-                shutil.unpack_archive(file_path, upload_path)
-                # Remove the zip file after extraction
-                os.remove(file_path)
+        try:
+            if upload_type == 'zip':
+                # Handle ZIP file upload
+                if 'codebase' not in request.files:
+                    flash('No file part')
+                    return redirect(request.url)
                 
-                # Store the upload_id in session for tracking this project
-                session['upload_id'] = upload_id
-                session['project_name'] = os.path.splitext(filename)[0]
+                file = request.files['codebase']
                 
-                # Redirect to the analysis page
-                return redirect(url_for('analyze'))
-            except Exception as e:
-                logger.error(f"Error extracting archive: {e}")
-                flash(f"Error extracting archive: {str(e)}")
+                # If user does not select file, browser also
+                # submit an empty part without filename
+                if file.filename == '':
+                    flash('No selected file')
+                    return redirect(request.url)
+                
+                if file:
+                    # Save the zipfile
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(upload_path, filename)
+                    file.save(file_path)
+                    
+                    # Extract the zipfile
+                    shutil.unpack_archive(file_path, upload_path)
+                    # Remove the zip file after extraction
+                    os.remove(file_path)
+                    
+                    # Store the project name based on the zip filename
+                    project_name = os.path.splitext(filename)[0]
+                    
+            elif upload_type == 'git':
+                # Handle Git repository clone
+                git_url = request.form.get('git_url')
+                git_branch = request.form.get('git_branch', None)  # Optional branch
+                
+                if not git_url:
+                    flash('No Git repository URL provided')
+                    return redirect(request.url)
+                
+                try:
+                    from git import Repo
+                    
+                    # Extract repository name from URL to use as project name
+                    repo_name = git_url.rstrip('/').split('/')[-1]
+                    if repo_name.endswith('.git'):
+                        repo_name = repo_name[:-4]  # Remove .git suffix
+                    
+                    # Clone the repository
+                    logger.info(f"Cloning Git repository from {git_url}")
+                    clone_args = {'url': git_url, 'to_path': upload_path}
+                    
+                    # Add branch if specified
+                    if git_branch:
+                        clone_args['branch'] = git_branch
+                    
+                    Repo.clone_from(**clone_args)
+                    project_name = repo_name
+                    
+                except Exception as e:
+                    logger.error(f"Error cloning Git repository: {e}")
+                    flash(f"Error cloning Git repository: {str(e)}")
+                    # Clean up created directory
+                    shutil.rmtree(upload_path)
+                    return redirect(request.url)
+            else:
+                flash('Invalid upload type')
                 return redirect(request.url)
+            
+            # Store the upload_id in session for tracking this project
+            session['upload_id'] = upload_id
+            session['project_name'] = project_name
+            
+            # Redirect to the analysis page
+            return redirect(url_for('analyze'))
+            
+        except Exception as e:
+            logger.error(f"Error processing upload: {e}")
+            flash(f"Error processing upload: {str(e)}")
+            # Clean up created directory
+            if os.path.exists(upload_path):
+                shutil.rmtree(upload_path)
+            return redirect(request.url)
     
     return render_template('upload.html')
 
