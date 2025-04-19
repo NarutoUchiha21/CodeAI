@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def create_visualizations(
-    analysis_result: Dict[str, Any], 
+    analysis_result, 
     knowledge_graph: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
@@ -68,19 +68,25 @@ def create_visualizations(
     
     return visualizations
 
-def create_code_distribution_chart(analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+def create_code_distribution_chart(analysis_result) -> Dict[str, Any]:
     """
     Create a chart showing code distribution by language.
     
     Args:
-        analysis_result: Results from code analysis.
+        analysis_result: Results from code analysis (dict or CodebaseAnalysis).
         
     Returns:
         Dictionary with chart data.
     """
     try:
         # Extract language distribution
-        languages = analysis_result.get('languages', {})
+        # Check if analysis_result is a dictionary or a CodebaseAnalysis object
+        if hasattr(analysis_result, 'languages'):
+            # It's a CodebaseAnalysis object
+            languages = analysis_result.languages
+        else:
+            # It's a dictionary
+            languages = analysis_result.get('languages', {})
         
         if not languages:
             return {'error': 'No language data available'}
@@ -231,19 +237,24 @@ def create_dependency_network(knowledge_graph: Dict[str, Any]) -> Dict[str, Any]
         logger.error(f"Error creating dependency network: {e}")
         return {'error': str(e)}
 
-def create_complexity_metrics_chart(analysis_result: Dict[str, Any]) -> Dict[str, Any]:
+def create_complexity_metrics_chart(analysis_result) -> Dict[str, Any]:
     """
     Create a chart showing complexity metrics for the codebase.
     
     Args:
-        analysis_result: Results from code analysis.
+        analysis_result: Results from code analysis (dict or CodebaseAnalysis).
         
     Returns:
         Dictionary with chart data.
     """
     try:
         # Extract complexity metrics
-        metrics = analysis_result.get('metrics', {}).get('complexity', {})
+        if hasattr(analysis_result, 'metrics'):
+            # It's a CodebaseAnalysis object
+            metrics = analysis_result.metrics.get('complexity', {}) if isinstance(analysis_result.metrics, dict) else {}
+        else:
+            # It's a dictionary
+            metrics = analysis_result.get('metrics', {}).get('complexity', {})
         
         if not metrics:
             return {'error': 'No complexity metrics available'}
