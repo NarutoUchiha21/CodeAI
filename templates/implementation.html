@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block title %}Code Implementation - {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>
+            <i class="fas fa-code me-2"></i>
+            Code Implementation: {{ project_name }}
+        </h2>
+        <div>
+            <a href="/download/code" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-download me-1"></i>
+                Download Code
+            </a>
+            <a href="/validation" class="btn btn-primary">
+                <i class="fas fa-check-circle me-1"></i>
+                Validate Implementation
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            The following code has been generated based on the extracted specifications and implementation strategy. The code implements the functionality of the original codebase.
+        </div>
+        
+        <!-- Implementation Overview -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-file-code me-2"></i>Implementation Overview</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5>Implementation Details:</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Generated Files
+                                    <span class="badge bg-primary rounded-pill">{{ implementation.files|length }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Total Lines of Code
+                                    <span class="badge bg-primary rounded-pill">{{ implementation.files|sum(attribute='content')|split('\n')|length }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5>File Structure:</h5>
+                            <div class="file-tree">
+                                <ul class="list-group">
+                                    {% for file in implementation.files %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-file-code text-primary me-2"></i>
+                                        {{ file.path }}
+                                        <small class="text-muted">
+                                            ({{ file.content|split('\n')|length }} lines)
+                                        </small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Execution Instructions -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-play me-2"></i>Execution Instructions</h4>
+            </div>
+            <div class="card-body">
+                <div class="execution-instructions">
+                    <pre class="bg-dark text-light p-3 rounded"><code>{{ implementation.execution_instructions }}</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Generated Code -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0"><i class="fas fa-code me-2"></i>Generated Code</h4>
+            </div>
+            <div class="card-body">
+                <div class="code-browser">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <!-- File List -->
+                            <div class="list-group" id="fileList" role="tablist">
+                                {% for file in implementation.files %}
+                                <a class="list-group-item list-group-item-action {% if loop.index == 1 %}active{% endif %}" 
+                                   id="file-{{ loop.index }}-list" 
+                                   data-bs-toggle="list" 
+                                   href="#file-{{ loop.index }}" 
+                                   role="tab" 
+                                   aria-controls="file-{{ loop.index }}">
+                                    <i class="fas fa-file-code me-2"></i>
+                                    {{ file.path }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <!-- File Content -->
+                            <div class="tab-content" id="fileListContent">
+                                {% for file in implementation.files %}
+                                <div class="tab-pane fade {% if loop.index == 1 %}show active{% endif %}" 
+                                     id="file-{{ loop.index }}" 
+                                     role="tabpanel" 
+                                     aria-labelledby="file-{{ loop.index }}-list">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">{{ file.path }}</h5>
+                                            <span class="badge bg-secondary">{{ file.content|split('\n')|length }} lines</span>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="code-container">
+                                                <pre class="line-numbers"><code class="language-{% if file.path.endswith('.py') %}python{% elif file.path.endswith('.js') %}javascript{% elif file.path.endswith('.html') %}html{% elif file.path.endswith('.css') %}css{% else %}plaintext{% endif %}">{{ file.content }}</code></pre>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <small class="text-muted">Purpose: {{ file.purpose }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        <a href="/validation" class="btn btn-primary btn-lg">
+            <i class="fas fa-check-circle me-2"></i>
+            Continue to Implementation Validation
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<!-- Prism for code highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-okaidia.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.css">
+{% endblock %}
+
+{% block scripts %}
+<!-- Prism for code highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-html.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Prism
+        Prism.highlightAll();
+    });
+</script>
+{% endblock %}

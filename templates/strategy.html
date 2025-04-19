@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block title %}Implementation Strategy - {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>
+            <i class="fas fa-project-diagram me-2"></i>
+            Implementation Strategy: {{ project_name }}
+        </h2>
+        <div>
+            <a href="/download/strategy" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-download me-1"></i>
+                Download Strategy
+            </a>
+            <a href="/implementation" class="btn btn-primary">
+                <i class="fas fa-code me-1"></i>
+                Implement Code
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            The following implementation strategy has been generated based on the extracted specifications. The strategy outlines the steps needed to re-implement the codebase.
+        </div>
+        
+        <!-- Strategy Overview -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-map me-2"></i>Strategy Overview</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5>Strategy Details:</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Total Implementation Steps
+                                    <span class="badge bg-primary rounded-pill">{{ strategy.steps|length }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Dependencies
+                                    <span class="badge bg-primary rounded-pill">{{ strategy.dependencies|length }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5>Execution Order:</h5>
+                            <ol class="list-group list-group-numbered">
+                                {% for step_id in strategy.execution_order %}
+                                    {% for step in strategy.steps %}
+                                        {% if step.id == step_id %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ step.description }}
+                                            {% if strategy.dependencies[step.id] %}
+                                            <span class="badge bg-secondary" title="Dependencies">
+                                                {{ strategy.dependencies[step.id]|length }}
+                                            </span>
+                                            {% endif %}
+                                        </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Implementation Steps -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Implementation Steps</h4>
+            </div>
+            <div class="card-body">
+                <div class="implementation-timeline">
+                    {% for step_id in strategy.execution_order %}
+                        {% for step in strategy.steps %}
+                            {% if step.id == step_id %}
+                            <div class="timeline-item">
+                                <div class="timeline-item-connector">
+                                    <div class="timeline-item-dot"></div>
+                                </div>
+                                <div class="timeline-item-content">
+                                    <div class="card mb-3">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">
+                                                <span class="badge bg-secondary me-2">Step {{ loop.index }}</span>
+                                                {{ step.description }}
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <h6>Expected Output:</h6>
+                                                <p>{{ step.expected_output }}</p>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <h6>Validation Criteria:</h6>
+                                                <ul class="list-group">
+                                                    {% for criterion in step.validation_criteria %}
+                                                    <li class="list-group-item">{{ criterion }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            
+                                            {% if strategy.dependencies[step.id] %}
+                                            <div>
+                                                <h6>Dependencies:</h6>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    {% for dep_id in strategy.dependencies[step.id] %}
+                                                        {% for dep_step in strategy.steps %}
+                                                            {% if dep_step.id == dep_id %}
+                                                            <span class="badge bg-info" title="{{ dep_step.description }}">
+                                                                {{ dep_step.id }}
+                                                            </span>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        <a href="/implementation" class="btn btn-primary btn-lg">
+            <i class="fas fa-code me-2"></i>
+            Continue to Code Implementation
+        </a>
+    </div>
+</div>
+{% endblock %}

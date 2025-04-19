@@ -1,0 +1,383 @@
+{% extends "layout.html" %}
+
+{% block title %}Specifications - {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>
+            <i class="fas fa-clipboard-list me-2"></i>
+            Extracted Specifications: {{ project_name }}
+        </h2>
+        <div>
+            <a href="/download/specifications" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-download me-1"></i>
+                Download Specs
+            </a>
+            <a href="/strategy" class="btn btn-primary">
+                <i class="fas fa-project-diagram me-1"></i>
+                Generate Strategy
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            The following specifications have been extracted from the codebase based on behavior analysis, code structure, and comments.
+        </div>
+        
+        <!-- Architecture Specifications -->
+        {% set architecture_specs = [] %}
+        {% for spec in specifications %}
+            {% if spec.entity_type == 'architecture' or spec.entity_type == 'pattern' %}
+                {% do architecture_specs.append(spec) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if architecture_specs %}
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0"><i class="fas fa-sitemap me-2"></i>Architectural Specifications</h4>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="architectureAccordion">
+                    {% for spec in architecture_specs %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button {{ '' if loop.index == 1 else 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="{{ 'true' if loop.index == 1 else 'false' }}" aria-controls="collapse{{ loop.index }}">
+                                <span class="badge bg-dark me-2">{{ spec.entity_type }}</span>
+                                {{ spec.entity_name }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {{ 'show' if loop.index == 1 else '' }}" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#architectureAccordion">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <h5>Purpose:</h5>
+                                    <p>{{ spec.purpose }}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Behavior:</h5>
+                                    <p>{{ spec.behavior }}</p>
+                                </div>
+                                
+                                {% if spec.constraints %}
+                                <div class="mb-3">
+                                    <h5>Constraints:</h5>
+                                    <ul class="list-group">
+                                        {% for constraint in spec.constraints %}
+                                        <li class="list-group-item">{{ constraint }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.dependencies %}
+                                <div>
+                                    <h5>Dependencies:</h5>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for dependency in spec.dependencies %}
+                                        <span class="badge bg-info">{{ dependency }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Module Specifications -->
+        {% set module_specs = [] %}
+        {% for spec in specifications %}
+            {% if spec.entity_type == 'module' %}
+                {% do module_specs.append(spec) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if module_specs %}
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-cubes me-2"></i>Module Specifications</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for spec in module_specs %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ spec.entity_name }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Purpose:</strong> {{ spec.purpose }}</p>
+                                
+                                {% if spec.constraints %}
+                                <div class="mb-2">
+                                    <strong>Constraints:</strong>
+                                    <ul class="mb-0">
+                                        {% for constraint in spec.constraints %}
+                                        <li>{{ constraint }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.dependencies %}
+                                <div>
+                                    <strong>Dependencies:</strong>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for dependency in spec.dependencies %}
+                                        <span class="badge bg-info">{{ dependency }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Class Specifications -->
+        {% set class_specs = [] %}
+        {% for spec in specifications %}
+            {% if spec.entity_type == 'class' %}
+                {% do class_specs.append(spec) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if class_specs %}
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-cogs me-2"></i>Class Specifications</h4>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="classAccordion">
+                    {% for spec in class_specs %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingClass{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClass{{ loop.index }}" aria-expanded="false" aria-controls="collapseClass{{ loop.index }}">
+                                {{ spec.entity_name }}
+                            </button>
+                        </h2>
+                        <div id="collapseClass{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="headingClass{{ loop.index }}" data-bs-parent="#classAccordion">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <h5>Purpose:</h5>
+                                    <p>{{ spec.purpose }}</p>
+                                </div>
+                                
+                                {% if spec.inputs %}
+                                <div class="mb-3">
+                                    <h5>Inputs (Constructor Parameters):</h5>
+                                    <ul class="list-group">
+                                        {% for input in spec.inputs %}
+                                        <li class="list-group-item">
+                                            <strong>{{ input.name }}</strong>
+                                            {% if input.type %}<span class="badge bg-secondary">{{ input.type }}</span>{% endif %}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.outputs %}
+                                <div class="mb-3">
+                                    <h5>Outputs (Methods/Properties):</h5>
+                                    <ul class="list-group">
+                                        {% for output in spec.outputs %}
+                                        <li class="list-group-item">
+                                            <strong>{{ output.name }}</strong>
+                                            <span class="badge bg-info">{{ output.type }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.behavior %}
+                                <div class="mb-3">
+                                    <h5>Behavior:</h5>
+                                    <p>{{ spec.behavior }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.constraints %}
+                                <div class="mb-3">
+                                    <h5>Constraints:</h5>
+                                    <ul class="list-group">
+                                        {% for constraint in spec.constraints %}
+                                        <li class="list-group-item">{{ constraint }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.dependencies %}
+                                <div class="mb-3">
+                                    <h5>Dependencies:</h5>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for dependency in spec.dependencies %}
+                                        <span class="badge bg-info">{{ dependency }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.examples %}
+                                <div>
+                                    <h5>Examples:</h5>
+                                    {% for example in spec.examples %}
+                                    <div class="example-block">
+                                        {% if example.type == 'code' %}
+                                        <pre class="bg-dark text-light p-3 rounded"><code>{{ example.content }}</code></pre>
+                                        {% else %}
+                                        <p>{{ example.content }}</p>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Function Specifications -->
+        {% set function_specs = [] %}
+        {% for spec in specifications %}
+            {% if spec.entity_type == 'function' %}
+                {% do function_specs.append(spec) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if function_specs %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="fas fa-code me-2"></i>Function Specifications</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for spec in function_specs %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ spec.entity_name }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Purpose:</strong> {{ spec.purpose }}</p>
+                                
+                                {% if spec.inputs %}
+                                <div class="mb-2">
+                                    <strong>Parameters:</strong>
+                                    <ul class="mb-0">
+                                        {% for input in spec.inputs %}
+                                        <li>
+                                            <code>{{ input.name }}</code>
+                                            {% if input.type != 'unknown' %}
+                                                <span class="badge bg-secondary">{{ input.type }}</span>
+                                            {% endif %}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.outputs %}
+                                <div class="mb-2">
+                                    <strong>Returns:</strong>
+                                    {% for output in spec.outputs %}
+                                        <span class="badge bg-info">{{ output.type }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if spec.constraints %}
+                                <div class="mb-2">
+                                    <strong>Constraints:</strong>
+                                    <ul class="mb-0">
+                                        {% for constraint in spec.constraints %}
+                                        <li>{{ constraint }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Other Entity Specifications -->
+        {% set other_specs = [] %}
+        {% for spec in specifications %}
+            {% if spec.entity_type not in ['architecture', 'pattern', 'module', 'class', 'function'] %}
+                {% do other_specs.append(spec) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if other_specs %}
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-puzzle-piece me-2"></i>Other Specifications</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for spec in other_specs %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <span class="badge bg-secondary me-2">{{ spec.entity_type }}</span>
+                                    {{ spec.entity_name }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Purpose:</strong> {{ spec.purpose }}</p>
+                                
+                                {% if spec.behavior %}
+                                <p><strong>Behavior:</strong> {{ spec.behavior }}</p>
+                                {% endif %}
+                                
+                                {% if spec.dependencies %}
+                                <div>
+                                    <strong>Dependencies:</strong>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for dependency in spec.dependencies %}
+                                        <span class="badge bg-info">{{ dependency }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+    </div>
+    <div class="card-footer text-center">
+        <a href="/strategy" class="btn btn-primary btn-lg">
+            <i class="fas fa-project-diagram me-2"></i>
+            Continue to Implementation Strategy
+        </a>
+    </div>
+</div>
+{% endblock %}

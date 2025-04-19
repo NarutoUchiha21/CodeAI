@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+
+{% block title %}Code Reverse-Engineering System - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    <i class="fas fa-code-branch me-2"></i>
+                    Code Reverse-Engineering System
+                </h1>
+                <p class="lead">
+                    An AI agent system that reverse-engineers codebases into specifications and re-implements them step by step.
+                </p>
+                <hr>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h3><i class="fas fa-cogs me-2"></i>How It Works</h3>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-file-upload"></i>
+                                </div>
+                                <div class="feature-description">
+                                    <h5>Upload Codebase</h5>
+                                    <p>Upload your existing codebase as a zip file.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-microscope"></i>
+                                </div>
+                                <div class="feature-description">
+                                    <h5>Analyze Structure</h5>
+                                    <p>AI agents analyze the code structure, dependencies, and patterns.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <div class="feature-description">
+                                    <h5>Extract Specifications</h5>
+                                    <p>Specifications are extracted from the code based on behavior analysis.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <div class="feature-description">
+                                    <h5>Generate Strategy</h5>
+                                    <p>Implementation strategy is created to rebuild the system.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="feature-description">
+                                    <h5>Implement Code</h5>
+                                    <p>AI agents implement the code following the strategy.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="feature-description">
+                                    <h5>Validate Implementation</h5>
+                                    <p>The new implementation is validated against the original.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h3><i class="fas fa-lightbulb me-2"></i>Features</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <i class="fas fa-brain me-2 text-primary"></i>
+                                <strong>AI-Powered Analysis:</strong> Deep understanding of code structure and functionality
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-sitemap me-2 text-success"></i>
+                                <strong>Knowledge Graph Visualization:</strong> Interactive visualization of code relationships
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-robot me-2 text-warning"></i>
+                                <strong>Multi-Agent Collaboration:</strong> Specialized agents work together to reverse-engineer the code
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-code-branch me-2 text-info"></i>
+                                <strong>Step-by-Step Implementation:</strong> Transparent rebuilding process
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-language me-2 text-danger"></i>
+                                <strong>Multiple Language Support:</strong> Works with common programming languages
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-balance-scale me-2 text-secondary"></i>
+                                <strong>Validation:</strong> Ensures functional equivalence with original code
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-4">
+                            <h3><i class="fas fa-arrow-circle-right me-2"></i>Get Started</h3>
+                            <p>
+                                Upload your codebase to begin the reverse-engineering process. The system works best with small to medium complexity codebases.
+                            </p>
+                            <a href="/upload" class="btn btn-primary btn-lg">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload Codebase
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
