@@ -1,0 +1,431 @@
+{% extends "layout.html" %}
+
+{% block title %}Implementation Validation - {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>
+            <i class="fas fa-check-circle me-2"></i>
+            Implementation Validation: {{ project_name }}
+        </h2>
+        <div>
+            <a href="/download/code" class="btn btn-outline-secondary">
+                <i class="fas fa-download me-1"></i>
+                Download Code
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-{% if validation.success %}success{% else %}warning{% endif %}">
+            <i class="fas fa-{% if validation.success %}check{% else %}exclamation{% endif %}-circle me-2"></i>
+            {% if validation.success %}
+            The implementation has been validated successfully against the original codebase.
+            {% else %}
+            The implementation has some differences compared to the original codebase.
+            {% endif %}
+        </div>
+        
+        <!-- Validation Summary -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Validation Summary</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="validation-metrics">
+                            <div class="validation-metric">
+                                <h5>Functional Equivalence</h5>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar {% if validation.functional_equivalence >= 80 %}bg-success{% elif validation.functional_equivalence >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ validation.functional_equivalence }}%;" 
+                                         aria-valuenow="{{ validation.functional_equivalence }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ validation.functional_equivalence|round(1) }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">Measures how well the implementation matches the original functionality</small>
+                            </div>
+                            
+                            <div class="validation-metric mt-4">
+                                <h5>Structural Similarity</h5>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar {% if validation.structural_similarity >= 80 %}bg-success{% elif validation.structural_similarity >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ validation.structural_similarity }}%;" 
+                                         aria-valuenow="{{ validation.structural_similarity }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ validation.structural_similarity|round(1) }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">Measures how well the implementation matches the original structure</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="validation-issues">
+                            <div class="mb-3">
+                                <h5>Missing Features</h5>
+                                {% if validation.missing_features %}
+                                <ul class="list-group">
+                                    {% for feature in validation.missing_features %}
+                                    <li class="list-group-item list-group-item-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        {{ feature }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    No missing features detected.
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div>
+                                <h5>Additional Features</h5>
+                                {% if validation.additional_features %}
+                                <ul class="list-group">
+                                    {% for feature in validation.additional_features %}
+                                    <li class="list-group-item list-group-item-info">
+                                        <i class="fas fa-plus-circle me-2"></i>
+                                        {{ feature }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    No additional features detected.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detailed Validation Results -->
+        {% if validation.error_details %}
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Detailed Validation Results</h4>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="validationTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-controls="files" aria-selected="true">
+                            <i class="fas fa-file-code me-1"></i>
+                            File Comparison
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="structure-tab" data-bs-toggle="tab" data-bs-target="#structure" type="button" role="tab" aria-controls="structure" aria-selected="false">
+                            <i class="fas fa-sitemap me-1"></i>
+                            Structural Comparison
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="missing-tab" data-bs-toggle="tab" data-bs-target="#missing" type="button" role="tab" aria-controls="missing" aria-selected="false">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Missing Elements
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="additional-tab" data-bs-toggle="tab" data-bs-target="#additional" type="button" role="tab" aria-controls="additional" aria-selected="false">
+                            <i class="fas fa-plus-circle me-1"></i>
+                            Additional Elements
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="validationTabContent">
+                    <!-- File Comparison Tab -->
+                    <div class="tab-pane fade show active" id="files" role="tabpanel" aria-labelledby="files-tab">
+                        {% if validation.error_details.file_comparison %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Generated File</th>
+                                        <th>Original File</th>
+                                        <th>Similarity</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in validation.error_details.file_comparison %}
+                                    <tr>
+                                        <td>{{ file.generated_path or 'N/A' }}</td>
+                                        <td>{{ file.original_path or 'N/A' }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar {% if file.similarity >= 0.8 %}bg-success{% elif file.similarity >= 0.5 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ (file.similarity * 100)|round }}%;" 
+                                                     aria-valuenow="{{ (file.similarity * 100)|round }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    {{ (file.similarity * 100)|round }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if not file.original_path %}
+                                                <span class="badge bg-info">Additional</span>
+                                            {% elif not file.generated_path %}
+                                                <span class="badge bg-warning">Missing</span>
+                                            {% elif file.error %}
+                                                <span class="badge bg-danger">Error</span>
+                                            {% elif file.similarity >= 0.8 %}
+                                                <span class="badge bg-success">Good Match</span>
+                                            {% elif file.similarity >= 0.5 %}
+                                                <span class="badge bg-warning">Partial Match</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Poor Match</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No file comparison data available.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Structural Comparison Tab -->
+                    <div class="tab-pane fade" id="structure" role="tabpanel" aria-labelledby="structure-tab">
+                        {% if validation.error_details.structural_comparison %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Files</h5>
+                                <div class="mb-2">
+                                    <strong>File Similarity: </strong>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar {% if validation.error_details.structural_comparison.file_similarity >= 0.8 %}bg-success{% elif validation.error_details.structural_comparison.file_similarity >= 0.5 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ (validation.error_details.structural_comparison.file_similarity * 100)|round }}%;" 
+                                             aria-valuenow="{{ (validation.error_details.structural_comparison.file_similarity * 100)|round }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ (validation.error_details.structural_comparison.file_similarity * 100)|round }}%
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Missing Files</h6>
+                                        {% if validation.error_details.structural_comparison.missing_files %}
+                                        <ul class="list-group">
+                                            {% for file in validation.error_details.structural_comparison.missing_files %}
+                                            <li class="list-group-item list-group-item-warning text-truncate" title="{{ file }}">
+                                                <i class="fas fa-file me-2"></i>
+                                                {{ file }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            No missing files.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <h6>Additional Files</h6>
+                                        {% if validation.error_details.structural_comparison.additional_files %}
+                                        <ul class="list-group">
+                                            {% for file in validation.error_details.structural_comparison.additional_files %}
+                                            <li class="list-group-item list-group-item-info text-truncate" title="{{ file }}">
+                                                <i class="fas fa-file me-2"></i>
+                                                {{ file }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            No additional files.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>Directories</h5>
+                                <div class="mb-2">
+                                    <strong>Directory Similarity: </strong>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar {% if validation.error_details.structural_comparison.directory_similarity >= 0.8 %}bg-success{% elif validation.error_details.structural_comparison.directory_similarity >= 0.5 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ (validation.error_details.structural_comparison.directory_similarity * 100)|round }}%;" 
+                                             aria-valuenow="{{ (validation.error_details.structural_comparison.directory_similarity * 100)|round }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ (validation.error_details.structural_comparison.directory_similarity * 100)|round }}%
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Missing Directories</h6>
+                                        {% if validation.error_details.structural_comparison.missing_directories %}
+                                        <ul class="list-group">
+                                            {% for dir in validation.error_details.structural_comparison.missing_directories %}
+                                            <li class="list-group-item list-group-item-warning text-truncate" title="{{ dir }}">
+                                                <i class="fas fa-folder me-2"></i>
+                                                {{ dir }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            No missing directories.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <h6>Additional Directories</h6>
+                                        {% if validation.error_details.structural_comparison.additional_directories %}
+                                        <ul class="list-group">
+                                            {% for dir in validation.error_details.structural_comparison.additional_directories %}
+                                            <li class="list-group-item list-group-item-info text-truncate" title="{{ dir }}">
+                                                <i class="fas fa-folder me-2"></i>
+                                                {{ dir }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            No additional directories.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No structural comparison data available.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Missing Elements Tab -->
+                    <div class="tab-pane fade" id="missing" role="tabpanel" aria-labelledby="missing-tab">
+                        {% if validation.error_details.missing_feature_details %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>File</th>
+                                        <th>Missing Elements</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for detail in validation.error_details.missing_feature_details %}
+                                    <tr>
+                                        <td>{{ detail.file }}</td>
+                                        <td>
+                                            <ul class="list-group">
+                                                {% for element in detail.elements %}
+                                                <li class="list-group-item list-group-item-warning">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    {{ element }}
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            No missing elements detected.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Additional Elements Tab -->
+                    <div class="tab-pane fade" id="additional" role="tabpanel" aria-labelledby="additional-tab">
+                        {% if validation.error_details.additional_feature_details %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>File</th>
+                                        <th>Additional Elements</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for detail in validation.error_details.additional_feature_details %}
+                                    <tr>
+                                        <td>{{ detail.file }}</td>
+                                        <td>
+                                            <ul class="list-group">
+                                                {% for element in detail.elements %}
+                                                <li class="list-group-item list-group-item-info">
+                                                    <i class="fas fa-plus-circle me-2"></i>
+                                                    {{ element }}
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            No additional elements detected.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-footer text-center">
+        <div class="row">
+            <div class="col-md-6">
+                <a href="/implementation" class="btn btn-outline-primary btn-lg w-100">
+                    <i class="fas fa-code me-2"></i>
+                    Back to Implementation
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="/download/code" class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-download me-2"></i>
+                    Download Final Code
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

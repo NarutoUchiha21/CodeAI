@@ -1,0 +1,299 @@
+{% extends "layout.html" %}
+
+{% block title %}Upload Codebase{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-upload me-2"></i>
+                    Upload Codebase
+                </h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Upload your codebase or provide a Git repository URL to begin the reverse-engineering process.
+                </p>
+                
+                <ul class="nav nav-tabs mb-4" id="uploadTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="zip-tab" data-bs-toggle="tab" data-bs-target="#zip-tab-pane" type="button" role="tab" aria-controls="zip-tab-pane" aria-selected="true">
+                            <i class="fas fa-file-archive me-2"></i>ZIP Upload
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="git-tab" data-bs-toggle="tab" data-bs-target="#git-tab-pane" type="button" role="tab" aria-controls="git-tab-pane" aria-selected="false">
+                            <i class="fab fa-git-alt me-2"></i>Git Repository
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="uploadTabsContent">
+                    <!-- ZIP Upload Tab -->
+                    <div class="tab-pane fade show active" id="zip-tab-pane" role="tabpanel" aria-labelledby="zip-tab" tabindex="0">
+                        <form action="/upload" method="post" enctype="multipart/form-data" class="mt-4" id="zipUploadForm">
+                            <input type="hidden" name="upload_type" value="zip">
+                            <div class="mb-3">
+                                <label for="codebase" class="form-label">Codebase ZIP File</label>
+                                <div class="upload-zone" id="uploadZone">
+                                    <input type="file" class="form-control" id="codebase" name="codebase" accept=".zip">
+                                    <div class="upload-placeholder">
+                                        <i class="fas fa-file-archive fa-3x mb-3"></i>
+                                        <p>Drag and drop your ZIP file here, or click to browse</p>
+                                        <small class="text-muted">Maximum file size: 50MB</small>
+                                    </div>
+                                    <div class="upload-preview d-none">
+                                        <i class="fas fa-file-archive fa-2x mb-2"></i>
+                                        <p id="fileName">filename.zip</p>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
+                                            <i class="fas fa-times"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="zipUploadButton">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload and Analyze
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Git Repository Tab -->
+                    <div class="tab-pane fade" id="git-tab-pane" role="tabpanel" aria-labelledby="git-tab" tabindex="0">
+                        <form action="/upload" method="post" class="mt-4" id="gitUploadForm">
+                            <input type="hidden" name="upload_type" value="git">
+                            <div class="mb-3">
+                                <label for="git_url" class="form-label">Git Repository URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fab fa-git-alt"></i></span>
+                                    <input type="text" class="form-control" id="git_url" name="git_url" 
+                                           placeholder="https://github.com/username/repository.git" required>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Enter the public Git repository URL you want to analyze.
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="git_branch" class="form-label">Branch (Optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                                    <input type="text" class="form-control" id="git_branch" name="git_branch" 
+                                           placeholder="main">
+                                </div>
+                                <small class="form-text text-muted">
+                                    Specify a branch to clone. Defaults to the repository's default branch if not specified.
+                                </small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="gitUploadButton">
+                                    <i class="fas fa-code-branch me-2"></i>
+                                    Clone and Analyze
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>Guidelines for best results:</h5>
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Include all source code files in your codebase
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Maintain original directory structure
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            For Git repositories, ensure the URL is publicly accessible
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Ideal for small to medium complexity projects
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-exclamation-circle text-warning me-2"></i>
+                            Currently works best with Python, JavaScript, TypeScript, Java, and C#
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ZIP Upload Form Handling
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('codebase');
+        const uploadPlaceholder = document.querySelector('.upload-placeholder');
+        const uploadPreview = document.querySelector('.upload-preview');
+        const fileName = document.getElementById('fileName');
+        const removeFile = document.getElementById('removeFile');
+        const zipUploadForm = document.getElementById('zipUploadForm');
+        const zipUploadButton = document.getElementById('zipUploadButton');
+        
+        // Git Upload Form Handling
+        const gitUploadForm = document.getElementById('gitUploadForm');
+        const gitUploadButton = document.getElementById('gitUploadButton');
+        
+        // Handle drag and drop events for ZIP upload
+        if (uploadZone) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            // Highlight drop zone when dragging over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            // Handle dropped files
+            uploadZone.addEventListener('drop', handleDrop, false);
+        }
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlight() {
+            uploadZone.classList.add('highlight');
+        }
+        
+        function unhighlight() {
+            uploadZone.classList.remove('highlight');
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFilePreview();
+            }
+        }
+        
+        // Handle file selection through input
+        if (fileInput) {
+            fileInput.addEventListener('change', updateFilePreview);
+        }
+        
+        function updateFilePreview() {
+            if (fileInput.files.length > 0) {
+                uploadPlaceholder.classList.add('d-none');
+                uploadPreview.classList.remove('d-none');
+                fileName.textContent = fileInput.files[0].name;
+            } else {
+                uploadPlaceholder.classList.remove('d-none');
+                uploadPreview.classList.add('d-none');
+            }
+        }
+        
+        // Handle file removal
+        if (removeFile) {
+            removeFile.addEventListener('click', function() {
+                fileInput.value = '';
+                uploadPlaceholder.classList.remove('d-none');
+                uploadPreview.classList.add('d-none');
+            });
+        }
+        
+        // Show loading state when ZIP form is submitted
+        if (zipUploadForm) {
+            zipUploadForm.addEventListener('submit', function() {
+                zipUploadButton.disabled = true;
+                zipUploadButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading & Analyzing...';
+            });
+        }
+        
+        // Show loading state when Git form is submitted
+        if (gitUploadForm) {
+            gitUploadForm.addEventListener('submit', function(e) {
+                // Get the repo URL for the loading message
+                const repoUrl = document.getElementById('git_url').value;
+                const repoName = repoUrl.split('/').pop().replace('.git', '');
+                
+                // Show loading overlay with customized message
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const loadingMessage = document.getElementById('loadingMessage');
+                const loadingDetails = document.getElementById('loadingDetails');
+                
+                loadingMessage.textContent = `Cloning Repository: ${repoName}`;
+                loadingDetails.textContent = 'This may take a few minutes depending on the repository size';
+                
+                // Show the button state change for immediate feedback
+                gitUploadButton.disabled = true;
+                gitUploadButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cloning...';
+                
+                // Show loading overlay with a slight delay to allow for button state change to be visible first
+                setTimeout(() => {
+                    loadingOverlay.classList.remove('d-none');
+                    
+                    // Fake progress updates to show activity
+                    let progress = 0;
+                    const progressBar = document.getElementById('loadingProgressBar');
+                    const progressInterval = setInterval(() => {
+                        if (progress < 90) {
+                            progress += Math.random() * 5;
+                            progressBar.style.width = `${progress}%`;
+                            
+                            if (progress > 30 && progress < 40) {
+                                loadingDetails.textContent = 'Downloading repository files...';
+                            } else if (progress > 60 && progress < 70) {
+                                loadingDetails.textContent = 'Analyzing code structure...';
+                            } else if (progress > 80) {
+                                loadingDetails.textContent = 'Building knowledge graph...';
+                            }
+                        }
+                    }, 800);
+                    
+                    // Store the interval ID in a form property so it can be accessed elsewhere
+                    gitUploadForm.progressInterval = progressInterval;
+                }, 100);
+                
+                // Handle cancel button
+                const cancelButton = document.getElementById('loadingCancel');
+                cancelButton.addEventListener('click', function() {
+                    // We can't actually cancel the server-side process, but we can redirect back
+                    window.location.href = window.location.pathname;
+                });
+            });
+        }
+        
+        // Add loading animation to tab buttons
+        const uploadTabs = document.querySelectorAll('#uploadTabs button');
+        uploadTabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function() {
+                // Reset all forms when switching tabs
+                if (zipUploadForm) zipUploadForm.reset();
+                if (gitUploadForm) gitUploadForm.reset();
+                
+                // Reset file preview
+                if (fileInput && uploadPlaceholder && uploadPreview) {
+                    fileInput.value = '';
+                    uploadPlaceholder.classList.remove('d-none');
+                    uploadPreview.classList.add('d-none');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

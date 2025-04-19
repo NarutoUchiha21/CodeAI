@@ -1,0 +1,269 @@
+{% extends "layout.html" %}
+
+{% block title %}Code Analysis - {{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>
+            <i class="fas fa-microscope me-2"></i>
+            Code Analysis: {{ project_name }}
+        </h2>
+        <a href="/specifications" class="btn btn-primary">
+            <i class="fas fa-clipboard-list me-1"></i>
+            Extract Specifications
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-chart-pie me-2"></i>Codebase Overview</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Total Files
+                                <span class="badge bg-primary rounded-pill">{{ analysis.metrics.total_files }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Total Lines of Code
+                                <span class="badge bg-primary rounded-pill">{{ analysis.metrics.total_lines }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Code Entities
+                                <span class="badge bg-primary rounded-pill">{{ analysis.metrics.total_entities }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Languages
+                                <span class="badge bg-primary rounded-pill">{{ analysis.languages|length }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-language me-2"></i>Language Distribution</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if visualizations.code_distribution and 'error' not in visualizations.code_distribution %}
+                            <div id="languageDistribution" class="visualization-container"></div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ visualizations.code_distribution.error if visualizations.code_distribution else 'No language distribution data available' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-project-diagram me-2"></i>Code Dependency Network</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if visualizations.dependency_network and 'error' not in visualizations.dependency_network %}
+                            <div id="dependencyNetwork" class="visualization-container" style="height: 500px;"></div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ visualizations.dependency_network.error if visualizations.dependency_network else 'No dependency network data available' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-brain me-2"></i>Code Complexity</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if visualizations.complexity_metrics and 'error' not in visualizations.complexity_metrics %}
+                            <div id="complexityMetrics" class="visualization-container"></div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ visualizations.complexity_metrics.error if visualizations.complexity_metrics else 'No complexity metrics data available' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-cubes me-2"></i>Entity Distribution</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if visualizations.entity_distribution and 'error' not in visualizations.entity_distribution %}
+                            <div id="entityDistribution" class="visualization-container"></div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ visualizations.entity_distribution.error if visualizations.entity_distribution else 'No entity distribution data available' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-network-wired me-2"></i>Code Communities</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if visualizations.communities and 'error' not in visualizations.communities %}
+                            <div id="communities" class="visualization-container"></div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ visualizations.communities.error if visualizations.communities else 'No communities data available' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h4><i class="fas fa-compass me-2"></i>Centrality Metrics</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if visualizations.centrality and 'error' not in visualizations.centrality %}
+                            <div id="centrality" class="visualization-container"></div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ visualizations.centrality.error if visualizations.centrality else 'No centrality data available' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-code me-2"></i>Top Entities by Complexity</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Entity Name</th>
+                                        <th>Type</th>
+                                        <th>File Path</th>
+                                        <th>Complexity</th>
+                                        <th>Dependencies</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set complexity_data = analysis.metrics.complexity.cyclomatic_complexity %}
+                                    {% if complexity_data %}
+                                        {% for entity_name, complexity_value in complexity_data|dictsort(by='value', reverse=true) %}
+                                            {% if loop.index <= 10 %}
+                                                {% set entity = None %}
+                                                {% for e in analysis.entities %}
+                                                    {% if e.name == entity_name %}
+                                                        {% set entity = e %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <tr>
+                                                    <td><strong>{{ entity_name }}</strong></td>
+                                                    <td>
+                                                        {% if entity %}
+                                                            {{ entity.type }}
+                                                        {% else %}
+                                                            Unknown
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if entity %}
+                                                            {{ entity.path }}
+                                                        {% else %}
+                                                            Unknown
+                                                        {% endif %}
+                                                    </td>
+                                                    <td><span class="badge bg-warning">{{ complexity_value }}</span></td>
+                                                    <td>
+                                                        {% if entity_name in analysis.dependencies %}
+                                                            <span class="badge bg-info">{{ analysis.dependencies[entity_name]|length }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary">0</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">No complexity data available</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        <a href="/specifications" class="btn btn-primary btn-lg">
+            <i class="fas fa-clipboard-list me-2"></i>
+            Continue to Specifications Extraction
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load visualizations
+        {% if visualizations.code_distribution and 'error' not in visualizations.code_distribution %}
+            loadPlotlyVisualization('languageDistribution', {{ visualizations.code_distribution.data|safe }});
+        {% endif %}
+        
+        {% if visualizations.dependency_network and 'error' not in visualizations.dependency_network %}
+            loadPlotlyVisualization('dependencyNetwork', {{ visualizations.dependency_network.data|safe }});
+        {% endif %}
+        
+        {% if visualizations.complexity_metrics and 'error' not in visualizations.complexity_metrics %}
+            loadPlotlyVisualization('complexityMetrics', {{ visualizations.complexity_metrics.data|safe }});
+        {% endif %}
+        
+        {% if visualizations.entity_distribution and 'error' not in visualizations.entity_distribution %}
+            loadPlotlyVisualization('entityDistribution', {{ visualizations.entity_distribution.data|safe }});
+        {% endif %}
+        
+        {% if visualizations.communities and 'error' not in visualizations.communities %}
+            loadPlotlyVisualization('communities', {{ visualizations.communities.data|safe }});
+        {% endif %}
+        
+        {% if visualizations.centrality and 'error' not in visualizations.centrality %}
+            loadPlotlyVisualization('centrality', {{ visualizations.centrality.data|safe }});
+        {% endif %}
+    });
+</script>
+{% endblock %}
