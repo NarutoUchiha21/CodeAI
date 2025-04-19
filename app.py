@@ -36,8 +36,8 @@ from agent_orchestrator import orchestrate_agents
 # Routes
 @app.route('/')
 def index():
-    """Landing page with project description"""
-    return render_template('index.html')
+    """Redirect to upload page"""
+    return redirect(url_for('upload'))
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
