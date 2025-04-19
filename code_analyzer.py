@@ -52,28 +52,81 @@ def analyze_codebase(codebase_path: str) -> CodebaseAnalysis:
         "complexity": {}
     }
     
+    # Check if the path exists and is a directory
+    if not os.path.exists(codebase_path):
+        logger.error(f"Codebase path does not exist: {codebase_path}")
+        return CodebaseAnalysis(
+            entities=entities,
+            languages=languages,
+            dependencies=dependencies,
+            structure=structure,
+            metrics=metrics
+        )
+    
+    if not os.path.isdir(codebase_path):
+        logger.error(f"Codebase path is not a directory: {codebase_path}")
+        return CodebaseAnalysis(
+            entities=entities,
+            languages=languages,
+            dependencies=dependencies,
+            structure=structure,
+            metrics=metrics
+        )
+    
+    # List of directories to skip
+    skip_dirs = ['.git', 'node_modules', '__pycache__', '.hg', '.svn', '.venv', 'venv', 'env']
+    
     # Walk through the codebase directory
     for root, dirs, files in os.walk(codebase_path):
+        # Skip certain directories
+        dirs[:] = [d for d in dirs if d not in skip_dirs]
+        
         # Add current directory to structure
         rel_path = os.path.relpath(root, codebase_path)
         if rel_path != '.':
             structure["directories"].append(rel_path)
         
         for file in files:
-            file_path = os.path.join(root, file)
-            rel_file_path = os.path.relpath(file_path, codebase_path)
-            structure["files"].append(rel_file_path)
-            
-            # Get file extension
-            _, ext = os.path.splitext(file)
-            language = LANGUAGE_EXTENSIONS.get(ext.lower(), 'Unknown')
-            
-            # Skip binary files or files that are too large
-            if is_binary_file(file_path) or os.path.getsize(file_path) > 1024 * 1024:  # 1MB
-                logger.info(f"Skipping binary or large file: {rel_file_path}")
-                continue
-            
+            file_path = ''
+            rel_file_path = ''
             try:
+                file_path = os.path.join(root, file)
+                rel_file_path = os.path.relpath(file_path, codebase_path)
+                
+                # Skip hidden files
+                if file.startswith('.'):
+                    continue
+                    
+                # Skip certain file patterns
+                if any(pattern in file for pattern in ['.pyc', '.min.js', '.map']):
+                    continue
+                
+                # Get file extension
+                _, ext = os.path.splitext(file)
+                language = LANGUAGE_EXTENSIONS.get(ext.lower(), 'Unknown')
+                
+                # Check if file exists and is a regular file
+                if not os.path.exists(file_path) or not os.path.isfile(file_path):
+                    logger.info(f"Skipping non-regular file: {rel_file_path}")
+                    continue
+                
+                # Check file size first to avoid stat-ing large files
+                try:
+                    file_size = os.path.getsize(file_path)
+                    if file_size > 1024 * 1024:  # 1MB
+                        logger.info(f"Skipping large file: {rel_file_path} ({file_size} bytes)")
+                        continue
+                except (OSError, IOError) as e:
+                    logger.warning(f"Error getting file size for {file_path}: {e}")
+                    continue
+                
+                # Skip binary files
+                if is_binary_file(file_path):
+                    logger.info(f"Skipping binary file: {rel_file_path}")
+                    continue
+                
+                structure["files"].append(rel_file_path)
+                
                 # Read file content
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
@@ -100,7 +153,7 @@ def analyze_codebase(codebase_path: str) -> CodebaseAnalysis:
                 metrics["total_entities"] += len(file_entities)
                 
             except Exception as e:
-                logger.error(f"Error analyzing file {rel_file_path}: {str(e)}")
+                logger.error(f"Error analyzing file {file}: {str(e)}")
     
     # Calculate complexity metrics
     metrics["complexity"] = calculate_complexity(entities, dependencies)
@@ -125,11 +178,25 @@ def is_binary_file(file_path: str) -> bool:
     Returns:
         True if the file is binary, False otherwise.
     """
+    import stat
+    import os
+    
+    # First check if it's a regular file (not a socket, FIFO, device, etc.)
+    try:
+        mode = os.stat(file_path).st_mode
+        if not stat.S_ISREG(mode):
+            # Skip non-regular files
+            return True
+    except (OSError, IOError):
+        # If we can't stat the file, consider it binary/skip it
+        return True
+    
+    # Try to read the file as text
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             f.read(1024)  # Try to read as text
         return False
-    except UnicodeDecodeError:
+    except (UnicodeDecodeError, OSError, IOError):
         return True
 
 def parse_file(file_path: str, content: str, language: str) -> Tuple[List[CodeEntity], Dict[str, List[str]]]:
